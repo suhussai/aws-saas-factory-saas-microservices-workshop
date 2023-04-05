@@ -1,12 +1,12 @@
 from replace_function import replace_in_file
 
-lab2_namespace_original_str = """    // REPLACE START: LAB1 (namespace)
+lab1_namespace_original_str = """    // REPLACE START: LAB1 (namespace)
     const namespace = "default";
     const multiTenantLabels = {};
     // REPLACE END: LAB1 (namespace)
 """
 
-lab2_namespace_update_str = """    const tier = props.tier;
+lab1_namespace_update_str = """    const tier = props.tier;
     const tenantId = props.tenantId;
     const namespace = props.namespace // from the ApplicationStack
     const multiTenantLabels = {
@@ -15,10 +15,10 @@ lab2_namespace_update_str = """    const tier = props.tier;
     }
 """
 
-replace_in_file(lab2_namespace_original_str, lab2_namespace_update_str,
+replace_in_file(lab1_namespace_original_str, lab1_namespace_update_str,
                 "../../lib/product/infrastructure/product-stack.ts")
 
-lab2_product_table_original_str = """
+lab1_product_table_original_str = """
     const productTable = new dynamodb.Table(this, "ProductTable", {
       partitionKey: { name: "productId", type: dynamodb.AttributeType.STRING },
       readCapacity: 5,
@@ -29,7 +29,7 @@ lab2_product_table_original_str = """
     });
 """
 
-lab2_product_table_update_str = """
+lab1_product_table_update_str = """
     const productTable = new dynamodb.Table(this, "ProductTable", {
       partitionKey: { name: "tenantId", type: dynamodb.AttributeType.STRING }, // tenant-id partition key
       sortKey: { name: "productId", type: dynamodb.AttributeType.STRING },
@@ -41,12 +41,12 @@ lab2_product_table_update_str = """
     });
 """
 
-replace_in_file(lab2_product_table_original_str, lab2_product_table_update_str,
+replace_in_file(lab1_product_table_original_str, lab1_product_table_update_str,
                 "../../lib/product/infrastructure/product-stack.ts")
 
-lab2_tenant_context_original_str = """# PASTE: LAB1(tenant context)"""
+lab1_tenant_context_original_str = """# PASTE: LAB1(tenant context)"""
 
-lab2_tenant_context_update_str = """
+lab1_tenant_context_update_str = """
 class TenantContext:
     tenant_id: str = None
     tenant_tier: str = None
@@ -57,12 +57,11 @@ class TenantContext:
 
 def get_tenant_context(authorization):
     token = authorization.replace("Bearer ", "")
-    decoded_token = jwt.decode(token, options={"verify_signature": False})    
+    decoded_token = jwt.decode(token, options={"verify_signature": False})
     return TenantContext(decoded_token)
-
 """
 
-replace_in_file(lab2_tenant_context_original_str, lab2_tenant_context_update_str,
+replace_in_file(lab1_tenant_context_original_str, lab1_tenant_context_update_str,
                 "../../lib/product/app/code/app.py")
 
 lab1_get_tenant_context_original_str = """    # PASTE: LAB1 (GET route tenant context)"""
@@ -174,7 +173,7 @@ lab1_get_products_update_str = """    # IMPLEMENT ME: LAB1 (GET /products)
             TableName=table_name,
             KeyConditionExpression='tenantId = :t_id',
             ExpressionAttributeValues={
-                # REPLACE LINE BELOW: LAB2 (bug)
+                # REPLACE LINE BELOW: lab1 (bug)
                 ':t_id': {'S': tenantContext.tenant_id}
             }
         )
