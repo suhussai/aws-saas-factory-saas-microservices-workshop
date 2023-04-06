@@ -7,16 +7,22 @@
 # remember to disable managed credentials for cloud9 before running!
 
 rm -vf ${HOME}/.aws/credentials
-# aws cloud9 update-environment  --environment-id $C9_PID --managed-credentials-action DISABLE
 
+### START ./1-introduction/2-environment-setup/2-on-your-own/p7-install-cloud9-tools.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 ./setup.sh
 
+### END ./1-introduction/2-environment-setup/2-on-your-own/p7-install-cloud9-tools.en.md #
+
+### START ./1-introduction/2-environment-setup/2-on-your-own/p8-create-cluster.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/standalone-eks-stack
 ./deploy-cluster.sh
 
 kubectl get namespaces
 
+### END ./1-introduction/2-environment-setup/2-on-your-own/p8-create-cluster.en.md #
+
+### START ./1-introduction/2-environment-setup/2-on-your-own/p9-deploy-base.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 ./deploy.sh
 
@@ -24,6 +30,9 @@ kubectl get namespaces
 
 aws cognito-idp list-user-pools --max-results 20 --query 'UserPools[?Name==`saas-microservices-workshop-user-pool`]'
 
+### END ./1-introduction/2-environment-setup/2-on-your-own/p9-deploy-base.en.md #
+
+### START ./2-Lab1/2-1-baseline-product-microservice/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack --parameters PoolBasicStack:mode="product"
 
@@ -63,9 +72,12 @@ curl -k --silent --location --request GET "${LB_HOSTNAME}/products/${PRODUCT_ID}
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_A}" | jq
 
+### END ./2-Lab1/2-1-baseline-product-microservice/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab1_updates.py
 
+### START ./2-Lab1/2-4-deploy-the-microservice/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 ./scripts/clean-single-tenant-product.sh
 npx cdk deploy PoolBasicStack --parameters PoolBasicStack:mode="product"
@@ -79,6 +91,9 @@ kubectl get all -n basic-pool
 
 aws dynamodb describe-table --table-name "SaaSMicroservices-Products-basic-pool"
 
+### END ./2-Lab1/2-4-deploy-the-microservice/index.en.md #
+
+### START ./2-Lab1/2-5-test-the-microservice/index.en.md #
 curl -k --silent --location --request POST "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_A}" \
@@ -105,9 +120,12 @@ curl -k --silent --location --request GET "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_D}" | jq
 
+### END ./2-Lab1/2-5-test-the-microservice/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab2_updates_break.py
 
+### START ./3-Lab2/3-1-app-bug/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack --parameters PoolBasicStack:mode="product"
 
@@ -115,24 +133,36 @@ curl -k --silent --location --request GET "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_D}" | jq
 
+### END ./3-Lab2/3-1-app-bug/index.en.md #
+
+### START ./3-Lab2/3-2-token-vendor-sidecar/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy TokenVendorStack
+
+### END ./3-Lab2/3-2-token-vendor-sidecar/index.en.md #
 
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab2_updates_fix.py
 
+### START ./3-Lab2/3-3-modifying-the-product-stack/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack --parameters PoolBasicStack:mode="product"
 
+### END ./3-Lab2/3-3-modifying-the-product-stack/index.en.md #
+
+### START ./3-Lab2/3-4-test-isolation/index.en.md #
 curl -k --silent --location --request GET "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_D}" | jq
 
 kubectl logs -n basic-pool -l app=product-app --tail 2
 
+### END ./3-Lab2/3-4-test-isolation/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab2_updates_unbreak.py
 
+### START ./3-Lab2/3-5-unbreak-the-service/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack --parameters PoolBasicStack:mode="product"
 
@@ -140,12 +170,19 @@ curl -k --silent --location --request GET "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_D}" | jq
 
+### END ./3-Lab2/3-5-unbreak-the-service/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab3_updates.py
+
+### START ./4-Lab3/4-1-introducing-library/index.en.md #
 
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack --parameters PoolBasicStack:mode="all"
 
+### END ./4-Lab3/4-1-introducing-library/index.en.md #
+
+### START ./4-Lab3/4-3-testing/index.en.md #
 kubectl get all -n basic-pool
 kubectl get vs -n basic-pool
 
@@ -181,9 +218,12 @@ kubectl logs -n basic-pool -l app=order-app --tail 6
 
 kubectl logs -n basic-pool -l app=fulfillment-app --tail 4
 
+### END ./4-Lab3/4-3-testing/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab4_updates_ingress.py
 
+### START ./5-Lab4/5-1-Ingress-routing/5-1-2-Ingress-routing-deploy/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack tenantCstack
 
@@ -192,6 +232,9 @@ kubectl -n istio-system get pods
 kubectl -n istio-ingress get pods
 kubectl -n istio-ingress get svc
 
+### END ./5-Lab4/5-1-Ingress-routing/5-1-2-Ingress-routing-deploy/index.en.md #
+
+### START ./5-Lab4/5-1-Ingress-routing/5-1-3-Ingress-routing-review/index.en.md #
 kubectl -n tenant-c get all
 
 kubectl -n basic-pool get all
@@ -210,6 +253,9 @@ kubectl -n basic-pool get vs product-vs \
     -o jsonpath='{.spec}' \
     | jq -r
 
+### END ./5-Lab4/5-1-Ingress-routing/5-1-3-Ingress-routing-review/index.en.md #
+
+### START ./5-Lab4/5-1-Ingress-routing/5-1-4-Ingress-routing-testing/index.en.md #
 RESP=$(curl -k --silent --location --request POST "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_C}" \
@@ -254,9 +300,12 @@ curl -k --silent --location --request POST "${LB_HOSTNAME}/orders" \
 
 kubectl logs -n basic-pool -l app=order-app --tail 10
 
+### END ./5-Lab4/5-1-Ingress-routing/5-1-4-Ingress-routing-testing/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab4_updates_service_to_service.py
 
+### START ./5-Lab4/5-2-service-to-service-routing/5-2-2-service-to-service-routing-deploy/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy PoolBasicStack tenantBstack
 
@@ -268,6 +317,9 @@ kubectl -n basic-pool get vs fulfillment-vs \
     -o jsonpath='{.spec}' \
     | jq -r
 
+### END ./5-Lab4/5-2-service-to-service-routing/5-2-2-service-to-service-routing-deploy/index.en.md #
+
+### START ./5-Lab4/5-2-service-to-service-routing/5-2-3-service-to-service-routing-testing/index.en.md #
 RESP=$(curl -k --silent --location --request POST "${LB_HOSTNAME}/products" \
         --header "Host: ${HOST}" \
         --header "Authorization: Bearer ${JWT_TOKEN_TENANT_B}" \
@@ -314,9 +366,12 @@ kubectl logs -n tenant-b -l app=fulfillment-app --tail 10
 
 kubectl logs -n basic-pool -l app=fulfillment-app --tail 10
 
+### END ./5-Lab4/5-2-service-to-service-routing/5-2-3-service-to-service-routing-testing/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab5_updates_logs.py
 
+### START ./6-Lab5/6-2-creating-tenant-aware-metrics-from-logs/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy --all
 
@@ -336,9 +391,15 @@ curl -k --silent --location --request POST "${LB_HOSTNAME}/orders" \
     \"products\": [\"$PRODUCT_ID\"]
 }" | jq
 
+cd ~/environment/aws-saas-factory-saas-microservices-workshop
+./scripts/run-queries.sh
+
+### END ./6-Lab5/6-2-creating-tenant-aware-metrics-from-logs/index.en.md #
+
 cd ~/environment/aws-saas-factory-saas-microservices-workshop/scripts/testing
 python3 lab5_updates_xray.py
 
+### START ./6-Lab5/6-3-tracing-with-aws-x-ray/index.en.md #
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 npx cdk deploy --all
 
@@ -347,3 +408,5 @@ cd ~/environment/aws-saas-factory-saas-microservices-workshop
 
 cd ~/environment/aws-saas-factory-saas-microservices-workshop
 ./scripts/run-queries.sh
+
+### END ./6-Lab5/6-3-tracing-with-aws-x-ray/index.en.md #
